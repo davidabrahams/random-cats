@@ -4,3 +4,5 @@ scala:
 script:
   - sbt compile
   - sbt run
+  - sbt scalafmtCheck
+  - sbt scalafmtSbtCheck
