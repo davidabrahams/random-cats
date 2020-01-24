@@ -1,5 +1,10 @@
 sealed trait Random {
-  def nextLong: (Random, Long)
+  final def nextLong: (Random, Long) = {
+    val (rng1, int1) = this.next(32)
+    val (rng2, int2) = rng1.next(32)
+    val long = (int1 << 32).toLong + int2
+    (rng2, long)
+  }
   protected def next(bits: Int): (Random, Int)
 }
 
@@ -7,7 +12,6 @@ final case class Seed(l: Long) extends AnyVal
 
 final case class RandomImpl(s: Seed) extends Random {
   import RandomImpl._
-  def nextLong: (Random, Long) = ???
   def next(bits: Int): (Random, Int) = {
     val nextSeed: Long = (s.l * multiplier + addend) & mask
     (RandomImpl(Seed(nextSeed)), (nextSeed >>> (48 - bits)).toInt)
@@ -21,5 +25,6 @@ object RandomImpl {
 }
 
 object Random {
-
+  def main(args: Array[String]): Unit = {
+  }
 }

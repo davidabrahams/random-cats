@@ -29,6 +29,9 @@ libraryDependencies += "com.twitter" % "algebird-core_2.13" % "0.13.6"
 // libraryDependencies += "org.scalatest" %% "scalatest" % "3.1.0" % Test */
 
 
+mainClass in (Compile, run) := Some("Random")
+
+
 // Here, `libraryDependencies` is a set of dependencies, and by using `+=`,
 // we're adding the cats dependency to the set of dependencies that sbt will go
 // and fetch when it starts up.
