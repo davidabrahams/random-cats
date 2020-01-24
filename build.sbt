@@ -12,7 +12,7 @@ scalaVersion := "2.13.1"
 
 // It's possible to define many kinds of settings, such as:
 
-name := "hello-world"
+name := "hello-world" // TODO: change this name
 organization := "ch.epfl.scala"
 version := "1.0"
 
@@ -23,6 +23,12 @@ version := "1.0"
 // Want to use a published library in your project?
 // You can define other libraries as dependencies in your build like this:
 libraryDependencies += "org.typelevel" %% "cats-core" % "2.0.0"
+libraryDependencies += "org.typelevel" %% "cats-effect" % "2.0.0"
+libraryDependencies += "com.chuusai" %% "shapeless" % "2.3.3"
+libraryDependencies += "com.twitter" % "algebird-core_2.13" % "0.13.6"
+// libraryDependencies += "org.scalatest" %% "scalatest" % "3.1.0" % Test */
+
+
 // Here, `libraryDependencies` is a set of dependencies, and by using `+=`,
 // we're adding the cats dependency to the set of dependencies that sbt will go
 // and fetch when it starts up.
