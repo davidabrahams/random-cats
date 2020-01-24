@@ -1,6 +1,9 @@
 *.class
 *.log
 
+*.swp
+.idea/
+
 # copy paste from https://github.com/github/gitignore/blob/master/Global/SBT.gitignore
 dist/*
 target/
