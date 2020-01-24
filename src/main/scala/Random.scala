@@ -1,10 +1,9 @@
+import java.util.{Random => JRandom}
+import scala.annotation.tailrec
+import cats.data.State
+
+
 sealed trait Random {
-  final def nextLong: (Random, Long) = {
-    val (rng1, int1) = this.next(32)
-    val (rng2, int2) = rng1.next(32)
-    val long = (int1 << 32).toLong + int2
-    (rng2, long)
-  }
   protected def next(bits: Int): (Random, Int)
 }
 
@@ -25,6 +24,47 @@ object RandomImpl {
 }
 
 object Random {
+  import RandomImpl._
+  def initialScramble(seed: Seed): Seed = Seed((seed.l ^ multiplier) & mask)
+  def apply(seed: Seed): Random = RandomImpl(initialScramble(seed))
+
+  def nextLong(rng: Random): (Random, Long) = {
+    val (rng1, int1) = nextInt(rng)
+    val (rng2, int2) = nextInt(rng1)
+    val long = (int1.toLong << 32) + int2
+    (rng2, long)
+  }
+  def nextInt(rng: Random): (Random, Int) = rng.next(32)
+
+  def randomLongs(n: Int)(rng: Random): (Random, List[Long]) = Random.tailRecList(n, Nil, rng, nextLong)
+  def randomInts(n: Int)(rng: Random): (Random, List[Int]) = Random.tailRecList(n, Nil, rng, nextInt)
+
+  @tailrec private def tailRecList[A](n: Int, acc: List[A], rng: Random, func: Random => (Random, A)): (Random, List[A]) =
+    n match {
+      case _ if n < 0 => sys.error("Bad!")
+      case 0 => (rng, acc)
+      case _ =>
+        val (rng0, a) = func(rng)
+        tailRecList(n-1, a :: acc, rng0, func)
+    }
+}
+
+object Main {
   def main(args: Array[String]): Unit = {
+    val seed = 42
+    val javaRandom = new JRandom(seed)
+    // test nextLong twice against Java
+    val rng0 = Random(Seed(seed))
+    val jlong1 = javaRandom.nextLong()
+    val (rng1, slong1) = Random.nextLong(rng0)
+    assert(jlong1 == slong1)
+    val jlong2 = javaRandom.nextLong()
+    val (rng2, slong2) = Random.nextLong(rng1)
+    assert(jlong2 == slong2)
+
+    // test nextInt
+    val jint = javaRandom.nextInt()
+    val (rng3, sint) = Random.nextInt(rng2)
+    assert(jint == sint)
   }
 }
