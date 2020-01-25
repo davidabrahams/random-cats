@@ -1,7 +1,5 @@
 import java.util.{Random => JRandom}
 import scala.annotation.tailrec
-import cats.Monad
-import org.scalatest.prop.PropertyChecks
 
 sealed trait Random {
   protected def next(bits: Int): (Random, Int)
