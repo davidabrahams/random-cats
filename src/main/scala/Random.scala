@@ -1,5 +1,3 @@
-import scala.annotation.tailrec
-
 sealed trait Random {
   protected def next(bits: Int): (Random, Int)
 }
@@ -8,6 +6,7 @@ final case class Seed(l: Long) extends AnyVal
 
 final private class RandomImpl(s: Seed) extends Random {
   import RandomImpl._
+  override def toString: String = s"RandomImpl(Seed=${s.l})"
   def next(bits: Int): (Random, Int) = {
     val nextSeed: Long = (s.l * multiplier + addend) & mask
     (new RandomImpl(Seed(nextSeed)), (nextSeed >>> (48 - bits)).toInt)
@@ -32,22 +31,19 @@ object Random {
   }
   def nextInt(rng: Random): (Random, Int) = rng.next(32)
 
-  def randomLongs(n: Int)(rng: Random): (Random, List[Long]) =
-    Random.tailRecList(n, Nil, rng, nextLong)
-  def randomInts(n: Int)(rng: Random): (Random, List[Int]) =
-    Random.tailRecList(n, Nil, rng, nextInt)
+  def stream[A](f: Random => (Random, A))(rng: Random): LazyList[(Random, A)] =
+    LazyList.iterate(f(rng)) { case (rng, _) => f(rng) }
 
-  @tailrec private def tailRecList[A](
-      n: Int,
-      acc: List[A],
-      rng: Random,
-      func: Random => (Random, A)
-  ): (Random, List[A]) =
+  def listOf[A](n: Int, f: Random => (Random, A))(rng: Random): (Random, List[A]) = {
     n match {
       case _ if n < 0 => throw new java.lang.IllegalArgumentException(s"$n is negative")
-      case 0          => (rng, acc)
+      case 0          => (rng, Nil)
       case _ =>
-        val (rng0, a) = func(rng)
-        tailRecList(n - 1, a :: acc, rng0, func)
+        val (streamWithoutTail, tail) = stream(f)(rng).splitAt(n - 1)
+        // we know stream returns an infinite stream, so tail has a head.
+        val (lastRng, lastA) = tail.head
+        val streamAs: LazyList[A] = streamWithoutTail.map(_._2) :+ lastA
+        (lastRng, streamAs.toList)
     }
+  }
 }
