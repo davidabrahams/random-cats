@@ -28,9 +28,7 @@ libraryDependencies += "com.chuusai" %% "shapeless" % "2.3.3"
 libraryDependencies += "com.twitter" % "algebird-core_2.13" % "0.13.6"
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.1.0" % Test
 
-
 mainClass in (Compile, run) := Some("Main")
-
 
 // Here, `libraryDependencies` is a set of dependencies, and by using `+=`,
 // we're adding the cats dependency to the set of dependencies that sbt will go
@@ -119,7 +117,8 @@ scalacOptions ++= Seq(
   "-Ywarn-unused:patvars", // Warn if a variable bound in a pattern is unused.
   "-Ywarn-unused:privates", // Warn if a private member is unused.
   "-Ywarn-value-discard", // Warn when non-Unit expression results are unused.
-  "-Ybackend-parallelism", "8", // Enable paralellisation — change to desired number!
+  "-Ybackend-parallelism",
+  "8", // Enable paralellisation — change to desired number!
   "-Ycache-plugin-class-loader:last-modified", // Enables caching of classloaders for compiler plugins
-  "-Ycache-macro-class-loader:last-modified", // and macro definitions. This can lead to performance improvements.
+  "-Ycache-macro-class-loader:last-modified" // and macro definitions. This can lead to performance improvements.
 )
