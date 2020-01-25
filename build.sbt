@@ -13,7 +13,8 @@ libraryDependencies += "org.scalacheck" %% "scalacheck" % "1.14.3" % "test"
 
 mainClass in (Compile, run) := Some("Main")
 
-val warts = Warts.allBut(Wart.Equals, Wart.Var, Wart.Throw, Wart.StringPlusAny, Wart.TraversableOps)
+val warts = Warts.allBut(Wart.Equals, Wart.Var, Wart.Throw, Wart.StringPlusAny,
+Wart.TraversableOps, Wart.While)
 
 wartremoverWarnings in (Test, compile) ++= warts
 wartremoverWarnings in (Compile, compile) ++= warts
