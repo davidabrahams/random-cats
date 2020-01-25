@@ -1,4 +1,3 @@
-import java.util.{Random => JRandom}
 import scala.annotation.tailrec
 
 sealed trait Random {
@@ -45,7 +44,7 @@ object Random {
       func: Random => (Random, A)
   ): (Random, List[A]) =
     n match {
-      case _ if n < 0 => sys.error("Bad!")
+      case _ if n < 0 => throw new java.lang.IllegalArgumentException(s"$n is negative")
       case 0          => (rng, acc)
       case _ =>
         val (rng0, a) = func(rng)
