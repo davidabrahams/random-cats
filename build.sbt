@@ -12,8 +12,7 @@ libraryDependencies += "org.scalatest" %% "scalatest" % "3.1.0" % Test
 
 mainClass in (Compile, run) := Some("Main")
 
-wartremoverWarnings ++= Warts.all
-wartremoverWarnings in (Compile, compile) ++= Seq(Wart.Equals)
+wartremoverWarnings in (Compile, compile) ++= Warts.allBut(Wart.Equals)
 
 scalacOptions ++= Seq(
   "-deprecation", // Emit warning and location for usages of deprecated APIs.
