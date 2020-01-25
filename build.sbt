@@ -26,7 +26,7 @@ libraryDependencies += "org.typelevel" %% "cats-core" % "2.0.0"
 libraryDependencies += "org.typelevel" %% "cats-effect" % "2.0.0"
 libraryDependencies += "com.chuusai" %% "shapeless" % "2.3.3"
 libraryDependencies += "com.twitter" % "algebird-core_2.13" % "0.13.6"
-// libraryDependencies += "org.scalatest" %% "scalatest" % "3.1.0" % Test */
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.1.0" % Test
 
 
 mainClass in (Compile, run) := Some("Main")

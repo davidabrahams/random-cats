@@ -76,9 +76,6 @@ object Main {
     val jint = javaRandom.nextInt()
     val (rng3, sint) = Random.nextInt(rng2)
     assert(jint == sint)
-
-
     println(Random.stream(Random.nextInt)(rng3).take(5).toList)
-
   }
 }
