@@ -4,5 +4,6 @@ scala:
 script:
   - '! sbt compile | grep -F "[warn]"' # a hack to make sure we compile without warnings
   - sbt run
+  - sbt test
   - sbt scalafmtCheck
   - sbt scalafmtSbtCheck
