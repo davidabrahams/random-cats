@@ -1,7 +1,7 @@
 import org.scalatest.FunSuite
-import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
+import org.scalatest.prop.GeneratorDrivenPropertyChecks
 
-class StackSpec extends FunSuite with ScalaCheckPropertyChecks {
+class StackSpec extends FunSuite with GeneratorDrivenPropertyChecks {
   test("This is a test") {
     assert(true)
   }
