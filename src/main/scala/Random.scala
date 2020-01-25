@@ -16,7 +16,7 @@ final private class RandomImpl(s: Seed) extends Random {
 }
 
 object RandomImpl {
-  def initialScramble(seed: Seed): Seed = Seed((seed.l ^ multiplier) & mask)
+  def initialScramble(s: Seed): Seed = Seed((s.l ^ multiplier) & mask)
   val mask: Long = (1L << 48) - 1;
   val multiplier: Long = 0x5DEECE66DL;
   val addend: Long = 0xBL;
@@ -51,24 +51,4 @@ object Random {
         val (rng0, a) = func(rng)
         tailRecList(n - 1, a :: acc, rng0, func)
     }
-}
-
-object Main {
-  def main(args: Array[String]): Unit = {
-    val seed = 42L
-    val javaRandom = new JRandom(seed)
-    // test nextLong twice against Java
-    val rng0 = Random(Seed(seed))
-    val jlong1 = javaRandom.nextLong()
-    val (rng1, slong1) = Random.nextLong(rng0)
-    assert(jlong1 == slong1)
-    val jlong2 = javaRandom.nextLong()
-    val (rng2, slong2) = Random.nextLong(rng1)
-    assert(jlong2 == slong2)
-
-    // test nextInt
-    val jint = javaRandom.nextInt()
-    val (_, sint) = Random.nextInt(rng2)
-    assert(jint == sint)
-  }
 }

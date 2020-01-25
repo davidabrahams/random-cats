@@ -13,7 +13,10 @@ libraryDependencies += "org.scalacheck" %% "scalacheck" % "1.14.3" % "test"
 
 mainClass in (Compile, run) := Some("Main")
 
-wartremoverWarnings in (Compile, compile) ++= Warts.allBut(Wart.Equals)
+val warts = Warts.allBut(Wart.Equals, Wart.Var)
+
+wartremoverWarnings in (Test, compile) ++= warts
+wartremoverWarnings in (Compile, compile) ++= warts
 
 scalacOptions ++= Seq(
   "-deprecation", // Emit warning and location for usages of deprecated APIs.
