@@ -1,7 +1,5 @@
 import java.util.{Random => JRandom}
 import scala.annotation.tailrec
-import scala.collection.immutable.LazyList
-import cats.data.State
 
 sealed trait Random {
   protected def next(bits: Int): (Random, Int)
@@ -58,7 +56,7 @@ object Random {
 
 object Main {
   def main(args: Array[String]): Unit = {
-    val seed = 42
+    val seed = 42L
     val javaRandom = new JRandom(seed)
     // test nextLong twice against Java
     val rng0 = Random(Seed(seed))
@@ -71,8 +69,7 @@ object Main {
 
     // test nextInt
     val jint = javaRandom.nextInt()
-    val (rng3, sint) = Random.nextInt(rng2)
+    val (_, sint) = Random.nextInt(rng2)
     assert(jint == sint)
-    println(Random.stream(Random.nextInt)(rng3).take(5).toList)
   }
 }
