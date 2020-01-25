@@ -40,15 +40,6 @@ object Random {
   def randomLongs(n: Int)(rng: Random): (Random, List[Long]) = Random.tailRecList(n, Nil, rng, nextLong)
   def randomInts(n: Int)(rng: Random): (Random, List[Int]) = Random.tailRecList(n, Nil, rng, nextInt)
 
-  def stream[A](take: Random => (Random, A))(rng: Random): LazyList[(Random, A)] = {
-    val first: (Random, A) = take(rng)
-    // TODO: this breaks with stackoverflow...
-    def lazylist: LazyList[(Random, A)] = first #:: lazylist.tail.map {
-      case (rng, a) => take(rng)
-    }
-    lazylist
-  }
-
   @tailrec private def tailRecList[A](n: Int, acc: List[A], rng: Random, func: Random => (Random, A)): (Random, List[A]) =
     n match {
       case _ if n < 0 => sys.error("Bad!")
