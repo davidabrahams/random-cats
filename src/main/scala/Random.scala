@@ -1,5 +1,7 @@
 import java.util.{Random => JRandom}
 import scala.annotation.tailrec
+import cats.Monad
+import org.scalatest.prop.PropertyChecks
 
 sealed trait Random {
   protected def next(bits: Int): (Random, Int)
@@ -7,24 +9,23 @@ sealed trait Random {
 
 final case class Seed(l: Long) extends AnyVal
 
-final case class RandomImpl(s: Seed) extends Random {
+final private class RandomImpl(s: Seed) extends Random {
   import RandomImpl._
   def next(bits: Int): (Random, Int) = {
     val nextSeed: Long = (s.l * multiplier + addend) & mask
-    (RandomImpl(Seed(nextSeed)), (nextSeed >>> (48 - bits)).toInt)
+    (new RandomImpl(Seed(nextSeed)), (nextSeed >>> (48 - bits)).toInt)
   }
 }
 
 object RandomImpl {
+  def initialScramble(seed: Seed): Seed = Seed((seed.l ^ multiplier) & mask)
   val mask: Long = (1L << 48) - 1;
   val multiplier: Long = 0x5DEECE66DL;
   val addend: Long = 0xBL;
 }
 
 object Random {
-  import RandomImpl._
-  def initialScramble(seed: Seed): Seed = Seed((seed.l ^ multiplier) & mask)
-  def apply(seed: Seed): Random = RandomImpl(initialScramble(seed))
+  def apply(seed: Seed): Random = new RandomImpl(RandomImpl.initialScramble(seed))
 
   def nextLong(rng: Random): (Random, Long) = {
     val (rng1, int1) = nextInt(rng)

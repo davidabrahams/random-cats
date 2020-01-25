@@ -1,14 +1,13 @@
-scalaVersion := "2.13.1"
+scalaVersion := "2.12.10"
 
 name := "rng4cats"
 organization := "ch.epfl.scala"
 version := "1.0"
 
 libraryDependencies += "org.typelevel" %% "cats-core" % "2.0.0"
-libraryDependencies += "org.typelevel" %% "cats-effect" % "2.0.0"
-libraryDependencies += "com.chuusai" %% "shapeless" % "2.3.3"
-libraryDependencies += "com.twitter" % "algebird-core_2.13" % "0.13.6"
-libraryDependencies += "org.scalatest" %% "scalatest" % "3.1.0" % Test
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.8"
+libraryDependencies += "org.scalacheck" %% "scalacheck" % "1.14.3"
+
 
 mainClass in (Compile, run) := Some("Main")
 
