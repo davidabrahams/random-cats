@@ -3,7 +3,6 @@ import scala.annotation.tailrec
 import scala.collection.immutable.LazyList
 import cats.data.State
 
-
 sealed trait Random {
   protected def next(bits: Int): (Random, Int)
 }
@@ -37,16 +36,23 @@ object Random {
   }
   def nextInt(rng: Random): (Random, Int) = rng.next(32)
 
-  def randomLongs(n: Int)(rng: Random): (Random, List[Long]) = Random.tailRecList(n, Nil, rng, nextLong)
-  def randomInts(n: Int)(rng: Random): (Random, List[Int]) = Random.tailRecList(n, Nil, rng, nextInt)
+  def randomLongs(n: Int)(rng: Random): (Random, List[Long]) =
+    Random.tailRecList(n, Nil, rng, nextLong)
+  def randomInts(n: Int)(rng: Random): (Random, List[Int]) =
+    Random.tailRecList(n, Nil, rng, nextInt)
 
-  @tailrec private def tailRecList[A](n: Int, acc: List[A], rng: Random, func: Random => (Random, A)): (Random, List[A]) =
+  @tailrec private def tailRecList[A](
+      n: Int,
+      acc: List[A],
+      rng: Random,
+      func: Random => (Random, A)
+  ): (Random, List[A]) =
     n match {
       case _ if n < 0 => sys.error("Bad!")
-      case 0 => (rng, acc)
+      case 0          => (rng, acc)
       case _ =>
         val (rng0, a) = func(rng)
-        tailRecList(n-1, a :: acc, rng0, func)
+        tailRecList(n - 1, a :: acc, rng0, func)
     }
 }
 
