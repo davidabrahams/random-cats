@@ -1,12 +1,9 @@
+package org.dabr.rng4cats
+
 sealed trait Random {
-  def next(bits: Int): (Random, Int)
-
   def nextLong: (Random, Long)
-
   def nextInt: (Random, Int)
-
   def nextDouble: (Random, Double)
-
   def nextFloat: (Random, Float)
 
   /**
@@ -28,7 +25,7 @@ final private class RandomImpl(s: Seed) extends Random {
   import RandomImpl._
   override def toString: String = s"RandomImpl(Seed=${s.l})"
 
-  def next(bits: Int): (Random, Int) = {
+  def next(bits: Int): (RandomImpl, Int) = {
     val nextSeed: Long = (s.l * multiplier + addend) & mask
     (new RandomImpl(new Seed(nextSeed)), (nextSeed >>> (48 - bits)).toInt)
   }
