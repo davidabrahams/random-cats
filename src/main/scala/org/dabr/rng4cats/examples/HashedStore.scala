@@ -33,13 +33,9 @@ final class RefHashedStore[F[_]: Functor](ref: Ref[F, Map[(Key, Hash), Value]])
     }
   }
   def get(k: Key): F[Option[Value]] = ref.get.map { map =>
-    map.keys
-      .filter {
-        case (k0, _) => k0 == k
-      }
-      .collectFirst {
-        case (key, hash) if map.contains((key, hash)) => map((key, hash))
-      }
+    map.collectFirst {
+      case ((key, _), value) if key == k => value
+    }
   }
 
   def hashes(k: Key): F[List[Hash]] = ref.get.map { map =>
