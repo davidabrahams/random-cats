@@ -1,7 +1,7 @@
 package org.dabr.rng4cats.examples
 
 import cats.effect.concurrent.Ref
-import cats.Monad
+import cats.Functor
 import cats.implicits._
 
 /**
@@ -16,14 +16,15 @@ final case class Value(val i: Int) extends AnyVal
  * Represents a K->V storage, where we always append a random hash to our key, to avoid writing to
  * the same location twice
  */
-trait Store[F[_]] {
+trait HashedStore[F[_]] {
   // returns true if the (Key, Hash) pair is unique, and got added to the store
   def put(k: Key, hash: Hash, v: Value): F[Boolean]
   def get(k: Key): F[Option[Value]]
   def hashes(k: Key): F[List[Hash]]
 }
 
-final class RefStore[F[_]: Monad](ref: Ref[F, Map[(Key, Hash), Value]]) extends Store[F] {
+final class RefHashedStore[F[_]: Functor](ref: Ref[F, Map[(Key, Hash), Value]])
+    extends HashedStore[F] {
   def put(k: Key, hash: Hash, v: Value): F[Boolean] = ref.modify { map =>
     val key = (k, hash)
     map.contains(key) match {

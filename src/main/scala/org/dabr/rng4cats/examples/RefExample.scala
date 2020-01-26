@@ -22,7 +22,7 @@ object RefExample {
    */
   def parallelWrite[F[_]: Monad: Parallel](
       writes: List[(Key, Value)],
-      store: Store[F],
+      store: HashedStore[F],
       rngRef: RandomRef[F]
   ): F[Boolean] = {
     val successes: F[List[Boolean]] = writes.parTraverse {
@@ -45,7 +45,7 @@ object RefExample {
     val rng: Random = Random(42)
     val io: IO[Unit] = for {
       ref <- Ref.of[IO, Map[(Key, Hash), Value]](Map.empty)
-      store = new RefStore[IO](ref)
+      store = new RefHashedStore[IO](ref)
       randomRef <- RandomRef[IO](rng)
       writeSuccess <- parallelWrite[IO](writes, store, randomRef)
       // even though we are sharing access to a mutable Random reference, we still produce
