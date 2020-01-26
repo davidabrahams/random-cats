@@ -1,6 +1,8 @@
 package org.dabr.rng4cats
 
-sealed trait Random {
+final class Seed(val l: Long) extends AnyVal
+
+trait Random {
   def nextLong: (Random, Long)
   def nextInt: (Random, Int)
   def nextDouble: (Random, Double)
@@ -19,9 +21,7 @@ sealed trait Random {
   def unsafeNextBytes(bytes: Array[Byte]): Random
 }
 
-final class Seed(val l: Long) extends AnyVal
-
-final private class RandomImpl(s: Seed) extends Random {
+final protected[rng4cats] case class RandomImpl(s: Seed) extends Random {
   import RandomImpl._
   override def toString: String = s"RandomImpl(Seed=${s.l})"
 
@@ -85,7 +85,7 @@ final private class RandomImpl(s: Seed) extends Random {
 }
 
 object RandomImpl {
-  def initialScramble(s: Seed): Seed = new Seed((s.l ^ multiplier) & mask)
+  def initialScramble(l: Long): Seed = new Seed((l ^ multiplier) & mask)
   val double_unit: Double = 1.0 / (1L << 53)
   val mask: Long = (1L << 48) - 1;
   val multiplier: Long = 0x5DEECE66DL;
@@ -97,7 +97,7 @@ object RandomImpl {
  * [[Random]] instance as an argument. This makes it easy to interop [[Random]] with [[cats.data.State]]
  */
 object Random {
-  def apply(seed: Seed): Random = new RandomImpl(RandomImpl.initialScramble(seed))
+  def apply(seed: Long): Random = new RandomImpl(RandomImpl.initialScramble(seed))
 
   def nextLong(rng: Random): (Random, Long) = rng.nextLong
   def nextInt(rng: Random): (Random, Int) = rng.nextInt

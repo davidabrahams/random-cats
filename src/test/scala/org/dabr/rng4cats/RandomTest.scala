@@ -33,7 +33,7 @@ class RandomTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
   test("matches Java nextBytes") {
     forAll(Arbitrary.arbitrary[Long], Gen.choose(0, 20), Gen.choose(0, 100)) {
       (l: Long, calls: Int, numBytes: Int) =>
-        val rng: Random = Random(new Seed(l))
+        val rng: Random = Random(l)
         val javaRng: JRandom = new JRandom(l)
         testSuccessive[Array[Byte]](
           calls,
@@ -51,7 +51,7 @@ class RandomTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
 
   test("matches Java nextInt on successive calls") {
     forAll(Arbitrary.arbitrary[Long], Gen.choose(0, 20)) { (l: Long, calls: Int) =>
-      val rng: Random = Random(new Seed(l))
+      val rng: Random = Random(l)
       val javaRng: JRandom = new JRandom(l)
       testSuccessive[Int](calls, javaRng, rng, j => j.nextInt, Random.nextInt)
     }
@@ -59,7 +59,7 @@ class RandomTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
 
   test("matches Java nextLong on successive calls") {
     forAll(Arbitrary.arbitrary[Long], Gen.choose(0, 20)) { (l: Long, calls: Int) =>
-      val rng: Random = Random(new Seed(l))
+      val rng: Random = Random(l)
       val javaRng: JRandom = new JRandom(l)
       testSuccessive[Long](calls, javaRng, rng, j => j.nextLong, Random.nextLong)
     }
@@ -67,7 +67,7 @@ class RandomTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
 
   test("matches Java nextDouble on successive calls") {
     forAll(Arbitrary.arbitrary[Long], Gen.choose(0, 20)) { (l: Long, calls: Int) =>
-      val rng: Random = Random(new Seed(l))
+      val rng: Random = Random(l)
       val javaRng: JRandom = new JRandom(l)
       testSuccessive[Double](calls, javaRng, rng, j => j.nextDouble, Random.nextDouble)
     }
@@ -75,7 +75,7 @@ class RandomTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
 
   test("matches Java nextFloat on successive calls") {
     forAll(Arbitrary.arbitrary[Long], Gen.choose(0, 20)) { (l: Long, calls: Int) =>
-      val rng: Random = Random(new Seed(l))
+      val rng: Random = Random(l)
       val javaRng: JRandom = new JRandom(l)
       testSuccessive[Float](calls, javaRng, rng, j => j.nextFloat, Random.nextFloat)
     }
@@ -83,7 +83,7 @@ class RandomTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
 
   test("listOf matches Java longs") {
     forAll(Arbitrary.arbitrary[Long], Gen.choose(0, 20)) { (l: Long, calls: Int) =>
-      val rng: Random = Random(new Seed(l))
+      val rng: Random = Random(l)
       val javaRng: JRandom = new JRandom(l)
       val javaLongs: List[Long] = javaRng.longs(calls.toLong).toArray.toList
       val scalaLongs: List[Long] = Random.listOf(calls, Random.nextLong)(rng)._2
@@ -94,7 +94,7 @@ class RandomTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
   test("concatting two random lists produces identical list") {
     forAll(Arbitrary.arbitrary[Long], Gen.choose(0, 10), Gen.choose(0, 10)) {
       (l: Long, length1: Int, length2) =>
-        val rng: Random = Random(new Seed(l))
+        val rng: Random = Random(l)
         val f = Random.nextLong(_)
         val (rng0, subList1) = Random.listOf(length1, f)(rng)
         val (_, subList2) = Random.listOf(length2, f)(rng0)

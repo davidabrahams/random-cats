@@ -7,3 +7,4 @@ script:
   - sbt test
   - sbt scalafmtCheck
   - sbt scalafmtSbtCheck
+  - sbt "runMain org.dabr.rng4cats.examples.RefExample"
