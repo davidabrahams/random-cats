@@ -1,3 +1,5 @@
+package org.dabr.rng4cats
+
 import org.scalatest.FunSuite
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
