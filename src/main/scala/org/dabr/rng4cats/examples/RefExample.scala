@@ -8,13 +8,25 @@ import cats.effect.concurrent.Ref
 
 import org.dabr.rng4cats.{Random, RandomImpl, RandomRef, Seed}
 
+
+/**
+ * This example demonstrates using RandomRef to concurrently generate random Longs, without ever
+ * reusing the same seed twice.
+ *
+ * We have a storage abstraction which requires each key to have a random hash associated with it
+ * to avoid write collisions. We perform 9 parallel writes with 3 keys, performing 3 writes per key.
+ * We never have collisions on our hashes, and our final Random state is always the same (as we have
+ * moved 9 seeds forward).
+ */
+
+
 final case class Key(val s: String) extends AnyVal
 final case class Hash(val l: Long) extends AnyVal
 final case class Value(val i: Int) extends AnyVal
 
 /**
- * Represents a K->V storage, where we never always append a random hash to our key, to avoid
- * writing to the same location twice
+ * Represents a K->V storage, where we always append a random hash to our key, to avoid writing to
+ * the same location twice
  */
 trait Store[F[_]] {
   // returns true if the (Key, Hash) pair is unique, and got added to the store
