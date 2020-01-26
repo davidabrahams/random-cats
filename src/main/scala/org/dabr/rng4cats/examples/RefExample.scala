@@ -1,12 +1,12 @@
 package org.dabr.rng4cats.examples
 
 import scala.concurrent.ExecutionContext
-import cats._
-import cats.effect._
+import cats.{Monad, Parallel}
+import cats.effect.{IO, ContextShift}
 import cats.implicits._
 import cats.effect.concurrent.Ref
 
-import org.dabr.rng4cats._
+import org.dabr.rng4cats.{Random, RandomImpl, RandomRef, Seed}
 
 final case class Key(val s: String) extends AnyVal
 final case class Hash(val l: Long) extends AnyVal
