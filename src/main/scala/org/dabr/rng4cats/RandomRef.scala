@@ -3,7 +3,6 @@ package org.dabr.rng4cats
 import cats.effect.concurrent.Ref
 import cats.effect.Sync
 
-
 /**
  * This is a pure, atomic, reference to a [[Random]]. This differs from cats'
  * [[cats.effect.concurrent.Ref]], as it prevents you from accidentally "reusing" an instance of

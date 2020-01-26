@@ -8,7 +8,6 @@ import cats.effect.concurrent.Ref
 
 import org.dabr.rng4cats.{Random, RandomImpl, RandomRef, Seed}
 
-
 /**
  * This example demonstrates using RandomRef to concurrently generate random Longs, without ever
  * reusing the same seed twice.
@@ -18,8 +17,6 @@ import org.dabr.rng4cats.{Random, RandomImpl, RandomRef, Seed}
  * We never have collisions on our hashes, and our final Random state is always the same (as we have
  * moved 9 seeds forward).
  */
-
-
 final case class Key(val s: String) extends AnyVal
 final case class Hash(val l: Long) extends AnyVal
 final case class Value(val i: Int) extends AnyVal
