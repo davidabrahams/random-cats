@@ -1,5 +1,8 @@
 package org.dabr.rng4cats
 
+
+import cats.effect.concurrent.Ref
+
 sealed trait Random {
   def nextLong: (Random, Long)
   def nextInt: (Random, Int)
@@ -17,6 +20,18 @@ sealed trait Random {
    * the one you passed to this function
    */
   def unsafeNextBytes(bytes: Array[Byte]): Random
+}
+
+/**
+ * This is a pure, atomic, reference to a [[Random]]. This differs from cats'
+ * [[cats.effect.concurrent.Ref]], as it prevents you from accidentally "reusing" an instance of
+ * Random by not properly updating the mutable state.
+ */
+class RandomRef[F[_]](rngRef: Ref[F, Random]) {
+  /**
+   * Generate a random A, and advance our our random state
+   */
+  def use[A, B](f: (Random => (Random, A))): F[A] = rngRef.modify(f)
 }
 
 final class Seed(val l: Long) extends AnyVal
@@ -85,7 +100,7 @@ final private class RandomImpl(s: Seed) extends Random {
 }
 
 object RandomImpl {
-  def initialScramble(s: Seed): Seed = new Seed((s.l ^ multiplier) & mask)
+  def initialScramble(l: Long): Seed = new Seed((l ^ multiplier) & mask)
   val double_unit: Double = 1.0 / (1L << 53)
   val mask: Long = (1L << 48) - 1;
   val multiplier: Long = 0x5DEECE66DL;
@@ -97,7 +112,7 @@ object RandomImpl {
  * [[Random]] instance as an argument. This makes it easy to interop [[Random]] with [[cats.data.State]]
  */
 object Random {
-  def apply(seed: Seed): Random = new RandomImpl(RandomImpl.initialScramble(seed))
+  def apply(seed: Long): Random = new RandomImpl(RandomImpl.initialScramble(seed))
 
   def nextLong(rng: Random): (Random, Long) = rng.nextLong
   def nextInt(rng: Random): (Random, Int) = rng.nextInt

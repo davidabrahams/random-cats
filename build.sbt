@@ -18,7 +18,8 @@ val warts = Warts.allBut(
   Wart.Throw,
   Wart.StringPlusAny,
   Wart.TraversableOps,
-  Wart.While
+  Wart.While,
+  Wart.Nothing,
 )
 
 wartremoverWarnings in (Test, compile) ++= warts
