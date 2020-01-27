@@ -67,8 +67,8 @@ scalacOptions ++= Seq(
 )
 
 val fatalWarnings = if (sys.env.get("CI").getOrElse("false").toBoolean) {
-   Seq("-Xfatal-warnings")
+  Seq("-Xfatal-warnings")
 } else {
-   Seq()
+  Seq()
 }
 scalacOptions ++= fatalWarnings
