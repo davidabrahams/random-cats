@@ -1,6 +1,11 @@
 package org.dabr.rng4cats
 
-final class Seed(val l: Long) extends AnyVal
+import cats.Applicative
+import cats.data.StateT
+import cats.effect.Sync
+import cats.effect.concurrent.Ref
+
+final case class Seed(val l: Long) extends AnyVal
 
 trait Random {
   def nextLong: (Random, Long)
@@ -19,11 +24,22 @@ trait Random {
    * the one you passed to this function
    */
   def unsafeNextBytes(bytes: Array[Byte]): Random
+
+  /**
+   * Produces an infinite [[LazyList]] of As, and the updated Random instance
+   */
+  def stream[A](f: Random => (Random, A)): LazyList[(Random, A)]
+
+  /**
+   * Produces a list of A's, and the [[Random]] instance created after producing the final A
+   * value. If n is 0, [[listOf]] returns an empty list, and the same [[Random]] instance right
+   * back.
+   */
+  def listOf[A](n: Int, f: Random => (Random, A)): (Random, List[A])
 }
 
 final protected[rng4cats] case class RandomImpl(s: Seed) extends Random {
   import RandomImpl._
-  override def toString: String = s"RandomImpl(Seed=${s.l})"
 
   def next(bits: Int): (RandomImpl, Int) = {
     val nextSeed: Long = (s.l * multiplier + addend) & mask
@@ -82,6 +98,22 @@ final protected[rng4cats] case class RandomImpl(s: Seed) extends Random {
     }
     rngVar
   }
+
+  def stream[A](f: Random => (Random, A)): LazyList[(Random, A)] =
+    LazyList.iterate(f(this)) { case (rng, _) => f(rng) }
+
+  def listOf[A](n: Int, f: Random => (Random, A)): (Random, List[A]) = {
+    n match {
+      case _ if n < 0 => throw new java.lang.IllegalArgumentException(s"$n is negative")
+      case 0          => (this, Nil)
+      case _ =>
+        val (streamWithoutTail, tail) = this.stream(f).splitAt(n - 1)
+        // we know stream returns an infinite stream, so tail has a head.
+        val (lastRng, lastA) = tail.head
+        val streamAs: LazyList[A] = streamWithoutTail.map(_._2) :+ lastA
+        (lastRng, streamAs.toList)
+    }
+  }
 }
 
 object RandomImpl {
@@ -99,34 +131,19 @@ object RandomImpl {
 object Random {
   def apply(seed: Long): Random = new RandomImpl(RandomImpl.initialScramble(seed))
 
-  def nextLong(rng: Random): (Random, Long) = rng.nextLong
-  def nextInt(rng: Random): (Random, Int) = rng.nextInt
-  def nextDouble(rng: Random): (Random, Double) = rng.nextDouble
-  def nextFloat(rng: Random): (Random, Float) = rng.nextFloat
-  def nextBytes(numBytes: Int)(rng: Random): (Random, Array[Byte]) = rng.nextBytes(numBytes)
-  def unsafeNextBytes(bytes: Array[Byte])(rng: Random): Random = rng.unsafeNextBytes(bytes)
+  def nextLong: Random => (Random, Long) = rng => rng.nextLong
+  def nextInt: Random => (Random, Int) = rng => rng.nextInt
+  def nextDouble: Random => (Random, Double) = rng => rng.nextDouble
+  def nextFloat: Random => (Random, Float) = rng => rng.nextFloat
+  def nextBytes(numBytes: Int): Random => (Random, Array[Byte]) = rng => rng.nextBytes(numBytes)
+  def unsafeNextBytes(bytes: Array[Byte]): Random => Random = rng => rng.unsafeNextBytes(bytes)
+  def stream[A](f: Random => (Random, A)): Random => LazyList[(Random, A)] = rng => rng.stream(f)
+  def listOf[A](n: Int, f: Random => (Random, A)): Random => (Random, List[A]) =
+    rng => rng.listOf(n, f)
 
-  /**
-   * Produces an infinite [[LazyList]] of As, and the updated Random instance
-   */
-  def stream[A](f: Random => (Random, A))(rng: Random): LazyList[(Random, A)] =
-    LazyList.iterate(f(rng)) { case (rng, _) => f(rng) }
+  def state[F[_], A](f: Random => (Random, A))(implicit F: Applicative[F]): StateT[F, Random, A] =
+    StateT(f.andThen(F.pure))
 
-  /**
-   * Produces a list of A's, and the [[Random]] instance created after producing the final A
-   * value. If n is 0, [[listOf]] returns an empty list, and the same [[Random]] instance right
-   * back.
-   */
-  def listOf[A](n: Int, f: Random => (Random, A))(rng: Random): (Random, List[A]) = {
-    n match {
-      case _ if n < 0 => throw new java.lang.IllegalArgumentException(s"$n is negative")
-      case 0          => (rng, Nil)
-      case _ =>
-        val (streamWithoutTail, tail) = stream(f)(rng).splitAt(n - 1)
-        // we know stream returns an infinite stream, so tail has a head.
-        val (lastRng, lastA) = tail.head
-        val streamAs: LazyList[A] = streamWithoutTail.map(_._2) :+ lastA
-        (lastRng, streamAs.toList)
-    }
-  }
+  def ref[F[_]](rng: Random)(implicit F: Sync[F]): F[RandomRef[F]] =
+    F.map(Ref.of[F, Random](rng))(new RandomRefImpl(_))
 }

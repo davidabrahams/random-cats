@@ -1,7 +1,6 @@
 package org.dabr.rng4cats
 
 import cats.effect.concurrent.Ref
-import cats.effect.Sync
 
 /**
  * This is a pure, atomic, reference to a [[Random]]. This differs from cats'
@@ -27,9 +26,4 @@ trait RandomRef[F[_]] {
 final private class RandomRefImpl[F[_]](rngRef: Ref[F, Random]) extends RandomRef[F] {
   def use[A, B](f: (Random => (Random, A))): F[A] = rngRef.modify(f)
   def read: F[Random] = rngRef.get
-}
-
-object RandomRef {
-  def apply[F[_]](rng: Random)(implicit F: Sync[F]): F[RandomRef[F]] =
-    F.map(Ref.of[F, Random](rng))(new RandomRefImpl(_))
 }

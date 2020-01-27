@@ -46,7 +46,7 @@ object RefExample {
     val io: IO[Unit] = for {
       ref <- Ref.of[IO, Map[(Key, Hash), Value]](Map.empty)
       store = new RefHashedStore[IO](ref)
-      randomRef <- RandomRef[IO](rng)
+      randomRef <- Random.ref[IO](rng)
       writeSuccess <- parallelWrite[IO](writes, store, randomRef)
       // even though we are sharing access to a mutable Random reference, we still produce
       // entirely unique hashes

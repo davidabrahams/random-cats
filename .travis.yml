@@ -8,3 +8,4 @@ script:
   - sbt scalafmtCheck
   - sbt scalafmtSbtCheck
   - sbt "runMain org.dabr.rng4cats.examples.RefExample"
+  - sbt "runMain org.dabr.rng4cats.examples.StateExample"

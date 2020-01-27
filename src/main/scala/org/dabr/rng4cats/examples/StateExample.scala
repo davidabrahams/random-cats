@@ -1,43 +1,42 @@
 package org.dabr.rng4cats.examples
 
-import cats.Monad
+import cats.{Monad, Parallel}
 import cats.data.StateT
-import cats.effect.IO
+import cats.effect.{IO, ContextShift}
 import cats.implicits._
 import cats.effect.concurrent.Ref
 
-import org.dabr.rng4cats.examples.Hash
+import scala.concurrent.ExecutionContext
 
-import org.dabr.rng4cats._
+import org.dabr.rng4cats.{Random, RandomImpl, Seed}
 
+/**
+ * This is an equivalent example of [[RefExample]], except we use [[cats.data.StateT]] to keep track
+ * of our random state.
+ */
 object StateExample {
 
   /**
    * Returns true if all writes were successful
    */
-  def parallelWrite[F[_]](
+  def parallelWrite[F[_]: Parallel](
       writes: List[(Key, Value)],
       store: HashedStore[F]
   )(implicit F: Monad[F]): StateT[F, Random, Boolean] = {
-    // TODO: there may be a one-liner which accomplished this
-    val randomStateF: StateT[F, Random, Long] = StateT {
-      val f: Random => (Random, Long) = Random.nextLong
-      f.andThen(F.pure)
+    val hashes: StateT[F, Random, List[Long]] =
+      Random.state[F, List[Long]](Random.listOf(writes.length, Random.nextLong))
+    val successes: StateT[F, Random, List[Boolean]] = hashes.flatMapF { longs =>
+      longs.zip(writes).parTraverse {
+        case (l, (k, v)) => store.put(k, Hash(l), v)
+      }
     }
-    // TODO: can this be parTraverse?
-    @SuppressWarnings(Array("org.wartremover.warts.Any"))
-    val stateList: StateT[F, Random, List[Boolean]] = writes.traverse {
-      case (k, v) =>
-        randomStateF.flatMap { l =>
-          StateT.liftF(store.put(k, new Hash(l), v))
-        }
-    }
-    stateList.map { list =>
+    successes.map { list =>
       list.forall(identity)
     }
   }
 
   def main(args: Array[String]): Unit = {
+    implicit val contextShift: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
     val keys: List[Key] =
       List("foo", "foo", "foo", "bar", "bar", "bar", "baz", "baz", "baz").map(new Key(_))
     val values: List[Value] = List(1, 2, 3, 4, 5, 6, 7, 8, 9).map(new Value(_))
@@ -50,7 +49,7 @@ object StateExample {
       finalRng = rngAndWriteSuccess._1
       writeSuccess = rngAndWriteSuccess._2
       _ <- IO(assert(writeSuccess))
-      _ <- IO(assert(finalRng == new RandomImpl(new Seed(214509311759785L))))
+      _ <- IO(assert(finalRng == RandomImpl(Seed(214509311759785L))))
     } yield ()
 
     io.unsafeRunSync
