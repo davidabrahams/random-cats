@@ -1,6 +1,6 @@
 scalaVersion := "2.13.1"
 
-name := "rng4cats"
+name := "Random Cats"
 organization := "org.dabr"
 
 version := "1.0"

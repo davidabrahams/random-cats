@@ -1,4 +1,4 @@
-package org.dabr.rng4cats
+package org.dabr.randomcats
 
 import org.scalatest.FunSuite
 import org.scalacheck.{Arbitrary, Gen}
