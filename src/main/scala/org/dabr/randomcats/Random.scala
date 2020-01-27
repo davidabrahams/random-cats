@@ -146,6 +146,7 @@ object Random {
    * Returns a [[Random]] instance, seeded by the current time. This is different from [[fromClock]]
    * in that if there are simulataneous calls to uniqueFromClock, the returned [[Random]]
    * instances will be unique. Each call updates local mutable state to guarantee uniqueness. This
+   * function is pure, as the mutable state updates are suspended in the F[_] context.
    * This matches the default [[java.util.Random]] constructor.
    */
   def uniqueFromClock[F[_]](clock: Clock[F])(implicit F: Sync[F]): F[Random] =
