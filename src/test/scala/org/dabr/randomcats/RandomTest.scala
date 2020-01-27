@@ -122,8 +122,8 @@ class RandomTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
     forAll(Arbitrary.arbitrary[Long]) {
       (time: Long) =>
         val clock: Clock[IO] = new Clock[IO] {
-          def monotonic(unit: TimeUnit)= IO.pure(time)
-          def realTime(unit: TimeUnit)= IO.pure(time)
+          def monotonic(unit: TimeUnit): IO[Long] = IO.pure(time)
+          def realTime(unit: TimeUnit): IO[Long] = IO.pure(time)
         }
         (for {
           rng1 <- Random.uniqueFromClock[IO](clock)
