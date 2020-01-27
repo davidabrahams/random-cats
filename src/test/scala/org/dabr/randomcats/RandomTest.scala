@@ -4,6 +4,10 @@ import org.scalatest.FunSuite
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import java.util.{Random => JRandom}
+import scala.concurrent.duration.TimeUnit
+
+import cats.Id
+import cats.effect.{IO, Clock}
 
 class RandomTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
 
@@ -100,6 +104,32 @@ class RandomTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
         val (_, subList2) = Random.listOf(length2, f)(rng0)
         val fullList = Random.listOf(length1 + length2, f)(rng)._2
         assert(subList1 ++ subList2 == fullList)
+    }
+  }
+
+  test("fromClock produces identical Random instances at identical times") {
+    forAll(Arbitrary.arbitrary[Long]) {
+      (time: Long) =>
+        val clock: Clock[Id] = new Clock[Id] {
+          def monotonic(unit: TimeUnit): Long = time
+          def realTime(unit: TimeUnit): Long = time
+        }
+        assert(Random.fromClock[Id](clock) == Random.fromClock[Id](clock))
+    }
+  }
+
+  test("fromClockUnique produces different Random instances at identical times") {
+    forAll(Arbitrary.arbitrary[Long]) {
+      (time: Long) =>
+        val clock: Clock[IO] = new Clock[IO] {
+          def monotonic(unit: TimeUnit): IO[Long] = IO.pure(time)
+          def realTime(unit: TimeUnit): IO[Long] = IO.pure(time)
+        }
+        (for {
+          rng1 <- Random.uniqueFromClock[IO](clock)
+          rng2 <- Random.uniqueFromClock[IO](clock)
+          _ <- IO(assert(rng1 != rng2))
+        } yield ()).unsafeRunSync
     }
   }
 }
