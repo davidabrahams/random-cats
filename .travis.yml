@@ -8,4 +8,5 @@ script:
   - sbt test
   - sbt scalafmtCheck
   - sbt scalafmtSbtCheck
-  - sbt "show discoveredMainClasses" | grep "* " | awk '{print $3}' | sbt runMain
+  # Run all main classes
+  - sbt "show discoveredMainClasses" | grep "* " | awk '{print $3}' | xargs -I {} sbt "runMain {}"
