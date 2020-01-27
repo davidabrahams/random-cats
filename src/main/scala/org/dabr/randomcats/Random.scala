@@ -1,9 +1,13 @@
 package org.dabr.randomcats
 
-import cats.Applicative
+import cats.{Applicative, Functor}
 import cats.data.{State, StateT}
-import cats.effect.Sync
+import cats.effect.{Clock, Sync}
 import cats.effect.concurrent.Ref
+import cats.implicits._
+
+import scala.concurrent.duration.NANOSECONDS
+import java.util.concurrent.atomic.AtomicLong
 
 final case class Seed(val l: Long) extends AnyVal
 
@@ -129,7 +133,30 @@ object RandomImpl {
  * [[Random]] instance as an argument. This makes it easy to interop [[Random]] with [[cats.data.State]]
  */
 object Random {
+  private val seedUniquifier: AtomicLong = new AtomicLong(8682522807148012L)
   def apply(seed: Long): Random = new RandomImpl(RandomImpl.initialScramble(seed))
+
+  /**
+   * Returns a [[Random]] instance, seeded by the current time
+   */
+  def fromClock[F[_]](clock: Clock[F])(implicit F: Functor[F]): F[Random] =
+    F.map(clock.monotonic(NANOSECONDS))(Random(_))
+
+  /**
+   * Returns a [[Random]] instance, seeded by the current time. This is different from [[fromClock]]
+   * in that if there are simulataneous calls to uniqueFromClock, the returned [[Random]]
+   * instances will be unique. Each call updates local mutable state to guarantee uniqueness. This
+   * This matches the default [[java.util.Random]] constructor.
+   */
+  def uniqueFromClock[F[_]](clock: Clock[F])(implicit F: Sync[F]): F[Random] =
+    for {
+      unique <- F.delay {
+        seedUniquifier.updateAndGet { l =>
+          l * 181783497276652981L
+        }
+      }
+      nanos <- clock.monotonic(NANOSECONDS)
+    } yield Random(unique ^ nanos)
 
   def nextLong: Random => (Random, Long) = rng => rng.nextLong
   def nextInt: Random => (Random, Int) = rng => rng.nextInt
