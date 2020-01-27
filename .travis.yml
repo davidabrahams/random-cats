@@ -1,11 +1,12 @@
 language: scala
 scala:
   - 2.13.1
+env:
+  - CI=true
 script:
-  - '! sbt compile | grep -F "[warn]"' # a hack to make sure we compile without warnings
-  - '! sbt test:compile | grep -F "[warn]"' # a hack to make sure we compile without warnings
+  - sbt compile
   - sbt test
   - sbt scalafmtCheck
   - sbt scalafmtSbtCheck
-  - sbt "runMain org.dabr.randomcats.examples.RefExample"
-  - sbt "runMain org.dabr.randomcats.examples.StateExample"
+  # Run all main classes
+  - sbt "show discoveredMainClasses" | grep "* " | awk '{print $3}' | xargs -I {} sbt "runMain {}"

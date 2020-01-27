@@ -1,7 +1,7 @@
 package org.dabr.randomcats
 
 import cats.Applicative
-import cats.data.StateT
+import cats.data.{State, StateT}
 import cats.effect.Sync
 import cats.effect.concurrent.Ref
 
@@ -141,8 +141,11 @@ object Random {
   def listOf[A](n: Int, f: Random => (Random, A)): Random => (Random, List[A]) =
     rng => rng.listOf(n, f)
 
-  def state[F[_], A](f: Random => (Random, A))(implicit F: Applicative[F]): StateT[F, Random, A] =
+  def stateT[F[_], A](f: Random => (Random, A))(implicit F: Applicative[F]): StateT[F, Random, A] =
     StateT(f.andThen(F.pure))
+
+  def state[A](f: Random => (Random, A)): State[Random, A] =
+    State(f)
 
   def ref[F[_]](rng: Random)(implicit F: Sync[F]): F[RandomRef[F]] =
     F.map(Ref.of[F, Random](rng))(new RandomRefImpl(_))

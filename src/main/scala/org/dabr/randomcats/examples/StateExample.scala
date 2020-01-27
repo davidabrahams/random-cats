@@ -24,7 +24,7 @@ object StateExample {
       store: HashedStore[F]
   )(implicit F: Monad[F]): StateT[F, Random, Boolean] = {
     val hashes: StateT[F, Random, List[Long]] =
-      Random.state[F, List[Long]](Random.listOf(writes.length, Random.nextLong))
+      Random.stateT[F, List[Long]](Random.listOf(writes.length, Random.nextLong))
     val successes: StateT[F, Random, List[Boolean]] = hashes.flatMapF { longs =>
       longs.zip(writes).parTraverse {
         case (l, (k, v)) => store.put(k, Hash(l), v)
