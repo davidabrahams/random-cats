@@ -1,4 +1,4 @@
-package org.dabr.rng4cats.examples
+package org.dabr.randomcats.examples
 
 import cats.{Monad, Parallel}
 import cats.effect.{IO, ContextShift}
@@ -7,7 +7,7 @@ import cats.effect.concurrent.Ref
 
 import scala.concurrent.ExecutionContext
 
-import org.dabr.rng4cats.{Random, RandomImpl, RandomRef, Seed}
+import org.dabr.randomcats.{Random, RandomImpl, RandomRef, Seed}
 
 /**
  * This example demonstrates using RandomRef to concurrently generate random Longs, without ever

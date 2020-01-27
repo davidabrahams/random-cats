@@ -1,4 +1,4 @@
-package org.dabr.rng4cats.examples
+package org.dabr.randomcats.examples
 
 import cats.{Monad, Parallel}
 import cats.data.StateT
@@ -8,7 +8,7 @@ import cats.effect.concurrent.Ref
 
 import scala.concurrent.ExecutionContext
 
-import org.dabr.rng4cats.{Random, RandomImpl, Seed}
+import org.dabr.randomcats.{Random, RandomImpl, Seed}
 
 /**
  * This is an equivalent example of [[RefExample]], except we use [[cats.data.StateT]] to keep track

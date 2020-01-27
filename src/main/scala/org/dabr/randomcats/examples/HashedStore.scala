@@ -1,4 +1,4 @@
-package org.dabr.rng4cats.examples
+package org.dabr.randomcats.examples
 
 import cats.effect.concurrent.Ref
 import cats.Functor

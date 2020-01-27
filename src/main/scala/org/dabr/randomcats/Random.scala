@@ -1,4 +1,4 @@
-package org.dabr.rng4cats
+package org.dabr.randomcats
 
 import cats.Applicative
 import cats.data.StateT
@@ -38,7 +38,7 @@ trait Random {
   def listOf[A](n: Int, f: Random => (Random, A)): (Random, List[A])
 }
 
-final protected[rng4cats] case class RandomImpl(s: Seed) extends Random {
+final protected[randomcats] case class RandomImpl(s: Seed) extends Random {
   import RandomImpl._
 
   def next(bits: Int): (RandomImpl, Int) = {
