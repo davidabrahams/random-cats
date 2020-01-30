@@ -5,8 +5,9 @@ organization := "org.dabr"
 
 version := "1.0"
 
-libraryDependencies += "org.typelevel" %% "cats-core" % "2.0.0"
+libraryDependencies += "org.typelevel" %% "cats-core" % "2.1.0"
 libraryDependencies += "org.typelevel" %% "cats-effect" % "2.0.0"
+libraryDependencies += "org.typelevel" %% "cats-free" % "2.1.0"
 libraryDependencies += "com.chuusai" %% "shapeless" % "2.3.3"
 libraryDependencies += "com.twitter" %% "algebird-core" % "0.13.6"
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.8" % "test"
