@@ -5,14 +5,19 @@ organization := "org.dabr"
 
 version := "1.0"
 
-libraryDependencies += "org.typelevel" %% "cats-core" % "2.0.0"
+libraryDependencies += "org.typelevel" %% "cats-core" % "2.1.0"
 libraryDependencies += "org.typelevel" %% "cats-effect" % "2.0.0"
+libraryDependencies += "org.typelevel" %% "cats-free" % "2.1.0"
 libraryDependencies += "com.chuusai" %% "shapeless" % "2.3.3"
 libraryDependencies += "com.twitter" %% "algebird-core" % "0.13.6"
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.8" % "test"
 libraryDependencies += "org.scalacheck" %% "scalacheck" % "1.14.3" % "test"
+libraryDependencies += "org.typelevel" %% "cats-tagless-macros" % "0.11"
+
+addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.0" cross CrossVersion.full)
 
 val warts = Warts.allBut(
+  Wart.Any, // we already have a compiler warning for this
   Wart.Equals,
   Wart.Var,
   Wart.Throw,
