@@ -11,6 +11,7 @@ import cats.effect.concurrent._
 import shapeless._
 
 import scala.concurrent._
+import org.dabr.free.syntax._
 
 import org.dabr.randomcats._
 
@@ -28,42 +29,31 @@ object FreeRandom {
   import HashedStoreDSL._
 
   type FreeS[F[_], A] = Free[FreeAp[F, *], A]
-  object FreeS {
-    type Par[F[_], A] = FreeAp[F, A]
-  }
-
   type DSL[A] = EitherK[RandomDSL, HashedStoreDSL, A]
-
-  def freeApFunctionK[F[_], A]: F ~> FreeAp[F, *] =
-    new (F ~> FreeAp[F, *]) {
-      def apply[B](fa: F[B]): FreeAp[F, B] = FreeAp.lift(fa)
-    }
-  def liftAp[F[_], A](free: Free[F, A]): FreeS[F, A] = free.mapK(freeApFunctionK)
 
   def parallelWriteFree(
       writes: List[(Key, Value)]
-  ): FreeS[DSL, Boolean] = {
-    // first, get RNG values for each write in sequence using Monad
-    val writesWithRng: Free[DSL, List[(Key, Value, Hash)]] = writes.traverse {
-      case (k, v) =>
-        Free.inject[RandomDSL, DSL](RandomLong).map { long =>
-          (k, v, Hash(long))
+  ): FreeS[DSL, Boolean] =
+    Free
+      .pure[FreeAp[DSL, ?], List[(Key, Value)]](writes)
+      .andThenPar { list =>
+        list.traverse {
+          case (k, v) =>
+            FreeAp.inject[RandomDSL, DSL](RandomLong).map { long =>
+              (k, v, Hash(long))
+            }
         }
-    }
-    val apWrites: FreeS[DSL, List[(Key, Value, Hash)]] = liftAp(writesWithRng)
-    apWrites.flatMap { l: List[(Key, Value, Hash)] =>
-      Free.liftF(
-        l.traverse {
+      }
+      .andThenPar { list =>
+        list
+          .traverse {
             case (k, v, h) =>
-              val dsl: DSL[Boolean] = InjectK[HashedStoreDSL, DSL].inj(Put(k, h, v))
-              FreeAp.lift[DSL, Boolean](dsl)
+              FreeAp.inject[HashedStoreDSL, DSL](Put(k, h, v))
           }
           .map { list =>
             list.forall(identity)
           }
-      )
-    }
-  }
+      }
 
   /**
    * Returns true if all writes were successful

@@ -17,7 +17,7 @@ libraryDependencies += "org.typelevel" %% "cats-tagless-macros" % "0.11"
 addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.0" cross CrossVersion.full)
 
 val warts = Warts.allBut(
-  Wart.Any, // TODO: remove this. For now, just silence warnings
+  Wart.Any, // we already have a compiler warning for this
   Wart.Equals,
   Wart.Var,
   Wart.Throw,
