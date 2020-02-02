@@ -12,8 +12,12 @@ libraryDependencies += "com.chuusai" %% "shapeless" % "2.3.3"
 libraryDependencies += "com.twitter" %% "algebird-core" % "0.13.6"
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.8" % "test"
 libraryDependencies += "org.scalacheck" %% "scalacheck" % "1.14.3" % "test"
+libraryDependencies += "org.typelevel" %% "cats-tagless-macros" % "0.11"
+
+addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.0" cross CrossVersion.full)
 
 val warts = Warts.allBut(
+  Wart.Any, // TODO: remove this. For now, just silence warnings
   Wart.Equals,
   Wart.Var,
   Wart.Throw,
