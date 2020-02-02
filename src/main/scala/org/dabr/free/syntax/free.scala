@@ -63,12 +63,4 @@ final class FreeSOps[F[_], A](private val free: Free[FreeAp[F, *], A]) extends A
     free.flatMap { a =>
       Utils.liftAp(f(a))
     }
-
-  // Perform a block of parallel steps
-  // def andThenParInject[G[_], B](f: A => G[B])(implicit inj: InjectK[G, F]): Free[FreeAp[F, *], B] = {
-  //   val parFn: A => FreeAp[F, B] = { a =>
-  //     inj.inject()
-  //   }
-  //   ???
-  //   }
 }
