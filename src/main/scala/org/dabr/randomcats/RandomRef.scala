@@ -1,6 +1,7 @@
 package org.dabr.randomcats
 
 import cats.effect.concurrent.Ref
+import cats.FlatMap
 
 /**
  * This is a pure, atomic, reference to a [[Random]]. This differs from cats'
@@ -9,12 +10,19 @@ import cats.effect.concurrent.Ref
  */
 trait RandomRef[F[_]] {
 
+  def next[A](f: (Random => (Random, A))): F[A]
+
   /**
-   * Generate a random A, and advance our our random state. It is expected that you use map,
-   * flatMap, and product to produce a program requiring multiple random numbers. This is meant to
+   * Consume a random A, and advance our our random state. This is meant to
    * interop with the functions defined on the [[Random]] companion, eg [[Random.nextLong]].
    */
-  def use[A, B](f: (Random => (Random, A))): F[A]
+  def use[A, B](f: (Random => (Random, A)))(g: A => B): F[B]
+
+  /**
+   * Consume a random A, advance our our random state, and sequentially compose an effect with
+   * FlatMap
+   */
+  def useF[A, B](f: (Random => (Random, A)))(g: A => F[B])(implicit F: FlatMap[F]): F[B]
 
   /**
    * Check the current Random state. It is recommended you only use this for debugging and logging,
@@ -24,6 +32,15 @@ trait RandomRef[F[_]] {
 }
 
 final private class RandomRefImpl[F[_]](rngRef: Ref[F, Random]) extends RandomRef[F] {
-  def use[A, B](f: (Random => (Random, A))): F[A] = rngRef.modify(f)
+  def next[A](f: (Random => (Random, A))): F[A] = rngRef.modify(f)
+  def use[A, B](f: (Random => (Random, A)))(g: A => B): F[B] = {
+    val composed: (Random => (Random, B)) = f.andThen { case (r, a) => (r, g(a)) }
+    rngRef.modify(composed)
+  }
+  def useF[A, B](f: (Random => (Random, A)))(g: A => F[B])(implicit F: FlatMap[F]): F[B] =
+    F.flatMap(rngRef.modify(f)) { a =>
+      g(a)
+    }
+
   def read: F[Random] = rngRef.get
 }

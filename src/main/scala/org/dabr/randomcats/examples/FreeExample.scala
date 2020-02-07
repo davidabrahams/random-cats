@@ -9,7 +9,6 @@ import cats.effect.concurrent._
 import shapeless._
 
 import scala.concurrent._
-import org.dabr.free.syntax._
 
 import org.dabr.randomcats._
 

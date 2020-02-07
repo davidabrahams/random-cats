@@ -1,13 +1,14 @@
 package org.dabr.randomcats
 
+import java.util.UUID
+import java.util.concurrent.atomic.AtomicLong
+import scala.concurrent.duration.NANOSECONDS
+
 import cats.{Applicative, Functor}
 import cats.data.{State, StateT}
 import cats.effect.{Clock, Sync}
 import cats.effect.concurrent.Ref
 import cats.implicits._
-
-import scala.concurrent.duration.NANOSECONDS
-import java.util.concurrent.atomic.AtomicLong
 
 final case class Seed(val l: Long) extends AnyVal
 
@@ -40,6 +41,8 @@ trait Random {
    * back.
    */
   def listOf[A](n: Int, f: Random => (Random, A)): (Random, List[A])
+
+  def nextUUID: (Random, UUID)
 }
 
 final protected[randomcats] case class RandomImpl(s: Seed) extends Random {
@@ -118,6 +121,23 @@ final protected[randomcats] case class RandomImpl(s: Seed) extends Random {
         (lastRng, streamAs.toList)
     }
   }
+
+  /**
+   * This matches the implementation of [[java.util.UUID.randomUUID]]. Note that it is not secure!
+   * This uses the default Java random 48-bit linear congruential formula to generate the UUID.
+   */
+  def nextUUID: (Random, UUID) = {
+    val (rng, bytes) = nextBytes(16)
+    var msb = 0L
+    var lsb = 0L
+    for (i <- 0 until 8) {
+      msb = (msb << 8) | (bytes(i) & 0xff);
+    }
+    for (i <- 8 until 16) {
+      lsb = (lsb << 8) | (bytes(i) & 0xff);
+    }
+    (rng, new UUID(msb, lsb))
+  }
 }
 
 object RandomImpl {
@@ -168,6 +188,7 @@ object Random {
   def stream[A](f: Random => (Random, A)): Random => LazyList[(Random, A)] = rng => rng.stream(f)
   def listOf[A](n: Int, f: Random => (Random, A)): Random => (Random, List[A]) =
     rng => rng.listOf(n, f)
+  def nextUUID: Random => (Random, UUID) = rng => rng.nextUUID
 
   def stateT[F[_], A](f: Random => (Random, A))(implicit F: Applicative[F]): StateT[F, Random, A] =
     StateT(f.andThen(F.pure))

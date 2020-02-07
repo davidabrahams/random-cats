@@ -27,7 +27,7 @@ object RefExample {
   ): F[Boolean] = {
     val successes: F[List[Boolean]] = writes.parTraverse {
       case (k, v) =>
-        rngRef.use(Random.nextLong).flatMap { l =>
+        rngRef.useF(Random.nextLong) { l =>
           store.put(k, new Hash(l), v)
         }
     }
