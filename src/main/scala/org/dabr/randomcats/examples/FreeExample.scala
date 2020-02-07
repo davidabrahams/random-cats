@@ -12,6 +12,9 @@ import scala.concurrent._
 
 import org.dabr.randomcats._
 
+/**
+ * TODO: actually run sequentialWriteFree in the main method
+ */
 object FreeRandom {
 
   sealed trait RandomDSL[A]
