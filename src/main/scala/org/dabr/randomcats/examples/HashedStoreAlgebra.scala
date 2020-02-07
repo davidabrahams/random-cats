@@ -1,8 +1,6 @@
 package org.dabr.randomcats.examples
 
-import cats.{~>, Monad, Applicative, Functor}
-import cats.free.Free.liftF
-import cats.free.{Free, FreeApplicative}
+import cats.~>
 
 object HashedStoreAlgebra {
   sealed trait HashedStoreDSL[A]

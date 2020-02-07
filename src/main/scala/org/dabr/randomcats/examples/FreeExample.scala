@@ -1,16 +1,8 @@
 package org.dabr.randomcats.examples
 
-import cats.{Monad, Applicative => Ap, Parallel, InjectK, ~>, Inject}
 import cats.data.EitherK
-import cats.free.{Free, FreeApplicative => FreeAp}
-import cats.effect._
+import cats.free.Free
 import cats.implicits._
-import cats.effect.concurrent._
-import shapeless._
-
-import scala.concurrent._
-
-import org.dabr.randomcats._
 
 /**
  * TODO: actually run sequentialWriteFree in the main method
