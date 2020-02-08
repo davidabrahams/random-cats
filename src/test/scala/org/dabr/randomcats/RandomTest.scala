@@ -132,4 +132,14 @@ class RandomTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
         } yield ()).unsafeRunSync
     }
   }
+
+  test("UUIDs are reasonable") {
+    val rng: Random = Random(42)
+    val (rng0, uuid0) = rng.nextUUID
+    assert(uuid0.toString == "359d41ba-f78a-fe0d-e1bb-e7ae28c0450c")
+    val (rng1, uuid1) = rng0.nextUUID
+    assert(uuid1.toString == "e43c084f-4bbb-2bf1-839d-ee466d852cb5")
+    val (_, uuid2) = rng1.nextUUID
+    assert(uuid2.toString == "be6a61aa-9a0c-6117-bd67-43e7dc978573")
+  }
 }
